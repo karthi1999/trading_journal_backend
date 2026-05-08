@@ -1,0 +1,154 @@
+generator client {
+  provider                    = "prisma-client-py"
+  interface                   = "asyncio"
+  recursive_type_depth        = 5
+  enable_experimental_decimal = "true"
+  output                      = "../app/prisma_client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TradeSide {
+  LONG
+  SHORT
+}
+
+enum TradeStatus {
+  OPEN
+  CLOSED
+  CANCELLED
+}
+
+enum AccountType {
+  LIVE
+  DEMO
+  PROP
+}
+
+enum ConnectionStatus {
+  CONNECTED
+  DISCONNECTED
+  PENDING
+  ERROR
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  username     String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  accounts    Account[]
+  trades      Trade[]
+  journals    DailyJournal[]
+  strategies  Strategy[]
+  connections Connection[]
+
+  @@map("users")
+}
+
+model Account {
+  id            String      @id @default(cuid())
+  userId        String
+  name          String
+  brokerName    String?
+  accountNumber String?
+  type          AccountType @default(LIVE)
+  balance       Decimal     @default(0) @db.Decimal(18, 2)
+  currency      String      @default("USD")
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trades Trade[]
+
+  @@index([userId])
+  @@map("accounts")
+}
+
+model Connection {
+  id         String           @id @default(cuid())
+  userId     String
+  brokerName String
+  status     ConnectionStatus @default(PENDING)
+  metadata   Json?
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("connections")
+}
+
+model Strategy {
+  id            String   @id @default(cuid())
+  userId        String
+  name          String
+  description   String?
+  entryCriteria Json     @default("[]")
+  exitCriteria  Json     @default("[]")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trades Trade[]
+
+  @@index([userId])
+  @@map("strategies")
+}
+
+model Trade {
+  id           String      @id @default(cuid())
+  userId       String
+  accountId    String
+  strategyId   String?
+  journalId    String?
+  symbol       String
+  side         TradeSide
+  status       TradeStatus @default(CLOSED)
+  quantity     Decimal     @db.Decimal(18, 8)
+  entryPrice   Decimal     @db.Decimal(18, 8)
+  exitPrice    Decimal?    @db.Decimal(18, 8)
+  pnl          Decimal     @default(0) @db.Decimal(18, 2)
+  commission   Decimal     @default(0) @db.Decimal(18, 2)
+  notes        String?
+  tags         String[]    @default([])
+  isVerified   Boolean     @default(false)
+  openedAt     DateTime
+  closedAt     DateTime?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account  Account       @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  strategy Strategy?     @relation(fields: [strategyId], references: [id], onDelete: SetNull)
+  journal  DailyJournal? @relation(fields: [journalId], references: [id], onDelete: SetNull)
+
+  @@index([userId, openedAt])
+  @@index([userId, closedAt])
+  @@index([accountId])
+  @@map("trades")
+}
+
+model DailyJournal {
+  id        String   @id @default(cuid())
+  userId    String
+  date      DateTime @db.Date
+  notes     String?
+  mood      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trades Trade[]
+
+  @@unique([userId, date])
+  @@index([userId])
+  @@map("daily_journals")
+}
