@@ -21,7 +21,15 @@ docker compose up -d
 
 ```bash
 cd trading_journal_backend
+
+#for linux/mac
 python -m venv .venv && source .venv/bin/activate
+
+#for windows
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+
+
 pip install -r requirements.txt
 cp .env.example .env   # adjust secrets
 prisma db push          # create tables
