@@ -31,10 +31,10 @@ class AccountResponse(BaseModel):
         return cls(
             id=a.id,
             name=a.name,
-            broker_name=a.brokerName,
-            account_number=a.accountNumber,
+            broker_name=a.broker_name,
+            account_number=a.account_number,
             type=a.type,
             balance=a.balance,
             currency=a.currency,
-            created_at=a.createdAt,
+            created_at=a.created_at,
         )

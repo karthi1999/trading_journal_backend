@@ -30,6 +30,12 @@ class TradeBrief(BaseModel):
     closed_at: date | None
 
 
+class MarketBreakdownSlice(BaseModel):
+    market: str
+    trades: int
+    pnl: Decimal
+
+
 class DashboardSummary(BaseModel):
     pnl: Decimal
     trades: int
@@ -46,5 +52,6 @@ class DashboardSummary(BaseModel):
     daily_pnl: list[TimeseriesPoint]
     calendar: list[CalendarDay]
     weekly: list[WeeklyAggregate]
+    by_market: list[MarketBreakdownSlice]
     best_trade: TradeBrief | None
     worst_trade: TradeBrief | None

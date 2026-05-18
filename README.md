@@ -1,4 +1,4 @@
-# Tradejournal
+# Tracker
 
 A trading journal and analytics platform. Next.js frontend, FastAPI backend, PostgreSQL via Prisma (shared schema between Node and Python).
 

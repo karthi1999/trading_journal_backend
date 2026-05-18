@@ -1,24 +1,36 @@
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
-from app.api import accounts, analytics, auth, dev, journals, strategies, trades
+from app.api import (
+    accounts,
+    analytics,
+    auth,
+    dev,
+    expenses,
+    financial_profile,
+    investments,
+    journals,
+    strategies,
+    trades,
+)
 from app.core.config import settings
-from app.db import connect_db, disconnect_db
+from app.db import engine
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    await connect_db()
     try:
         yield
     finally:
-        await disconnect_db()
+        await engine.dispose()
 
 
 app = FastAPI(
-    title="Tradejournal API",
+    title="Tracker API",
     version="0.1.0",
     docs_url="/docs",
     redoc_url=None,
@@ -33,6 +45,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+_UPLOAD_DIR = Path(__file__).resolve().parent / "uploads"
+_UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=str(_UPLOAD_DIR)), name="uploads")
+
 
 @app.get("/health", tags=["meta"])
 async def health() -> dict[str, str]:
@@ -45,4 +61,7 @@ app.include_router(trades.router, prefix="/api")
 app.include_router(strategies.router, prefix="/api")
 app.include_router(journals.router, prefix="/api")
 app.include_router(analytics.router, prefix="/api")
+app.include_router(financial_profile.router, prefix="/api")
+app.include_router(investments.router, prefix="/api")
+app.include_router(expenses.router, prefix="/api")
 app.include_router(dev.router, prefix="/api")

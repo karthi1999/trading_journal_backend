@@ -32,7 +32,7 @@ class StrategyResponse(BaseModel):
             id=s.id,
             name=s.name,
             description=s.description,
-            entry_criteria=s.entryCriteria or [],
-            exit_criteria=s.exitCriteria or [],
-            created_at=s.createdAt,
+            entry_criteria=s.entry_criteria or [],
+            exit_criteria=s.exit_criteria or [],
+            created_at=s.created_at,
         )

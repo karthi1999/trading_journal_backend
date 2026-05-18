@@ -24,7 +24,7 @@ class JournalResponse(BaseModel):
             date=j.date.date() if isinstance(j.date, datetime) else j.date,
             notes=j.notes,
             mood=j.mood,
-            created_at=j.createdAt,
+            created_at=j.created_at,
         )
 
 

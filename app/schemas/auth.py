@@ -9,11 +9,6 @@ class RegisterRequest(BaseModel):
     password: str = Field(min_length=8, max_length=128)
 
 
-class LoginRequest(BaseModel):
-    email: EmailStr
-    password: str
-
-
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
@@ -28,5 +23,5 @@ class UserResponse(BaseModel):
     @classmethod
     def from_model(cls, user) -> "UserResponse":
         return cls(
-            id=user.id, email=user.email, username=user.username, created_at=user.createdAt
+            id=user.id, email=user.email, username=user.username, created_at=user.created_at
         )

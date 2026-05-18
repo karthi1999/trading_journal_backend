@@ -41,6 +41,10 @@ app/prisma_client/
 *.db
 *.dump
 
+# Uploaded files (served via /uploads). Keep the directory, ignore contents.
+app/uploads/*
+!app/uploads/.gitkeep
+
 # Logs
 *.log
 
